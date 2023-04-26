@@ -24,5 +24,5 @@ int main() {
 			LATB ^= 0x08;
 			delay_ms(1000);
 		}
-   }
+   	}
 }
