@@ -1,0 +1,115 @@
+ZADATAK 1
+U razvojnom okruženju "MikroC PRO for PIC" kreirati novi projekat pod imenom "Vezba1",
+selektovati "Device Name" P18F45K22, i projekat snimiti u odgovarajući folder po želji. U
+projekat dodati novi ".c" fajl pod imenom "Vezba1", i uključiti u projekat sve raspoložive
+biblioteke - opcija "Include All (Default)".
+U fajl "Vezba1.c" uneti sledeći source kod:
+
+// NOTES:
+// - Turn ON the PORTA LEDs at SW3.1 and PORTD LEDs at SW3.4.
+// - Put button jumper (J17) into VCC position.
+// - Pull-down RB0.
+// - Put jumpers J3 and J4 into USB UART position.
+// - Turn ON RX and TX USB UART switches (SW1.1 and SW2.1).
+char uart_rd;
+void main() {
+ ANSELB = 0; // Configure PORTB pins as digital
+ ANSELC = 0; // Configure PORTC pins as digital
+ TRISA = 0; // set direction to be output
+ TRISB = 0x01; // set RB0 pin as input
+ TRISD = 0; // set direction to be output
+
+ LATA = 0x00; // Turn OFF LEDs on PORTA
+ LATD = 0x00; // Turn OFF LEDs on PORTD
+
+ UART1_Init(9600); // Initialize UART module at 9600 bps
+ Delay_ms(100); // Wait for UART module to stabilize
+ UART1_Write_Text("Start");
+ UART1_Write(13);
+ UART1_Write(10);
+ while (1)
+ {
+ if (Button(&PORTB, 0, 5, 1)) // Detect logical one
+ {
+ LATA = 0x03; // Turn ON two LEDs (RA0 and RA1) on PORTA
+ LATD = 0x03; // Turn ON two LEDs (RD0 and RD1) on PORTD
+ }
+ if (Button(&PORTB, 0, 5, 0)) // Detect logical zero
+ {
+ LATA = 0x00; // Turn OFF LEDs on PORTA
+ LATD = 0x00; // Turn OFF LEDs on PORTD
+ }
+ if (UART1_Data_Ready())
+ { // If data is received,
+ uart_rd = UART1_Read(); // read the received data,
+ UART1_Write(uart_rd); // and send data via UART
+ }
+ }
+}
+
+• Povezati razvojni sistem EasyPic v7 sa laptopom preko USB kabla (preko USB konektora
+CN2).
+
+• Povezati pinove mikrokontrolera sa porta A i porta D na odgovarajuće LED-ove
+uključivanjem prekidača SW3.1 i SW3.4. Ostali prekidači na SW3 i SW4 treba da budu
+isključeni.
+
+• Kratkospojnik (jumper) J17 postaviti u poziciju VCC, čime se podešava da logički nivo koji
+se dovodi na pin mikrokontrolera pritiskanjem odgovarajućeg tastera odgovara nivou
+logičke jedinice.
+
+• Pomoću odgovarajućeg prekidača povezati pull-down otpornik na pin RB0 (koji je podešen
+da bude ulazni pin), čime se obezbeđuje da logički nivo na pinu RB0, kada odgovarajući
+taster nije pritisnut, odgovara nivou logičke nule. Pull-up i pull-down otpornici na ostalim
+pinovima treba da ostanu nepovezani.
+
+• Postaviti kratkospojnike J3 i J4 u USB-UART poziciju i uključiti prekidače SW1.1 i SW2.1,
+čime se RC6 i RC7 pinovi mikrokontrolera (preko kojih se odvija UART komunikacija)
+preko čipa FT232RL (koji vrši konverziju signala iz UART protokola u USB protokol)
+povezuje na USB konektor CN32.
+
+• Uključiti napajanje na razvojnom sistemu, odraditi build unetog source koda i izvršiti
+programiranje mikrokontrolera.
+
+• Proanalizirati uneti source kod i ponašanje razvojnog sistema.
+
+Detaljan opis značenja pojedinih bita registara specijalne namene koji kontrolišu portove
+mikrokontrolera se može videti u datasheet-u mikrokontrolera "40001412G.pdf" u sekciji 10
+("I/O Ports"). Opis postavljanja pull-up ili pull-down otpornika na pinove mikrokontrolera se
+može naći u "easypic-v7-manual-v104d.pdf" na strani 22. Opis podešavanja logičkog nivoa
+pritisnutog tastera i omogućavanja rada LED-ova se može naći u "easypic-v7-manual-v104d.pdf"
+na strani 23. Opis funkcije "Button" se može naći u "mikroc_manual.pdf" na strani 338.
+Kompletna električna šema razvojnog sistema se može naći u dokumentu " easypic-v7-
+schematic-v104c.pdf".
+
+ZADATAK 2
+Napisati program u programskom jeziku C za mikrokontroler PIC18F45K22 koji će detektovati
+pritisak na tastere povezane na pinove RA0, RA1, RA2 i RA3 mikrokontrolera. Pritisnuti taster
+treba da na odgovarajućem pinu mikrokontrolera generiše naponski nivo logičke jedinice, pri
+čemu program treba da detektuje promenu naponskog nivoa signala sa logičke nule na logičku
+jedinicu na tom pinu mikrokontrolera. Kao rezultat, odgovarajuća LED na portu B
+mikrokontrolera treba da se upali (pritisak na taster povezan na RA0 treba da upali LED
+povezanu na RB0, pritisak na taster povezan na RA1 treba da upali LED povezanu na RB1, itd.).
+Svaki naredni pritisak na taster RAx (x=0,1,2,3) treba da promeni stanje odgovarajuće LED RBx
+(ako je bila upaljena da je ugasi i obratno).
+Na razvojnom sistemu EasyPic v7 obezbediti preko odgovarajućih prekidača da samo portovi
+mikrokontrolera koji treba da uključuju/isključuju LED-ove budu povezani na odgovarajuće
+LED-ove, dok ostali portovi mikrokontrolera ne treba da budu povezani LED-ove. Obezbediti
+preko odgovarajućih prekidača da na ulazne pinove mikrokontrolera koji treba da detektuju
+pritiske tastera, budu povezani pull-down otpornici, dok na ostale pinove mikrokontrolera ne
+treba da budu povezani ni pull-up niti pull-down otpornici. Preko odgovarajućeg kratkospojnika,
+podesiti da logički nivo koji se dovodi na pin mikrokontrolera pritiskanjem odgovarajućeg
+tastera odgovara nivou logičke jedinice.
+
+ZADATAK 3
+Povezati drugim USB kablom razvojni sistem sa laptopom (preko USB konektora CN32). Preko
+odgovarajućih kratkospojnika i prekidača povezati RC6 i RC7 pinove mikrokontrolera (preko
+kojih se odvija UART komunikacija) preko čipa FT232RL (koji vrši konverziju signala iz UART
+protokola u USB protokol) na USB konektor CN32.
+Dopuniti program iz prethodnog zadatka na način koji će omogućiti da se nakon uspostavljanja
+veze između laptopa i razvojnog sistema, preko "USART Terminala" pri bitskoj brzini od 9600
+bit/s, nakon slanja karaktera 'r' razvojnom sistemu, kao odgovor od strane razvojnog sistema
+prosledi decimalni zapis binarnog broja predstavljenog upaljenim LED-ovima (npr. ako su
+upaljene LED RB3 i RB1, odgovarajući decimalni zapis treba da bude 10) i to u vidu karaktera
+ili niza karaktera (u zavisnosti od broja cifara koje decimalni zapis sadrži).
+Isprogramirati mikrokontroler, testirati i debagovati (po potrebi) napisani program.
